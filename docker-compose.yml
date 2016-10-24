@@ -1,0 +1,21 @@
+version: '2'
+services:
+  pg-backup:
+    image: njordan/pg-backup
+    build:
+      context: .
+      dockerfile: Dockerfile
+    links:
+      - example_db:ex
+    volumes:
+      - ./backup:/backup
+    environment:
+      - BACKUP_DIR=/backup/
+      - POSTGRES_HOST=ex
+      - POSTGRES_USER=test_db
+      - POSTGRES_PASSWORD=somepass
+  example_db:
+    image: postgres:9.6
+    environment:
+      - POSTGRES_USER=test_db
+      - POSTGRES_PASSWORD=somepass
