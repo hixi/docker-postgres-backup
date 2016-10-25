@@ -45,15 +45,8 @@ def set_up_schedule():
     # backup whenever the container is booted, only runs once.
     schedule.every(1).seconds.do(job_once)
 
-    every_minutes = os.environ.get('EVERY_MINUTES', None)
-    every_hours = os.environ.get('EVERY_HOURS', None)
-    every_day_at = os.environ.get('EVERY_DAY_AT', None)
-    if every_minutes:
-        schedule.every(int(every_minutes)).minutes.do(job)
-    if every_hours:
-        schedule.every(int(every_hours)).hours.do(job)
-    if every_day_at:
-        schedule.every().day.at(every_day_at).do(job)
+    every_day_at = os.environ.get('EVERY_DAY_AT', '03:02')
+    schedule.every().day.at(every_day_at).do(job)
     # Other examples would be:
     # schedule.every(10).minutes.do(job)
     # schedule.every(10).seconds.do(job)

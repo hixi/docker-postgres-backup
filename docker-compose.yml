@@ -14,12 +14,8 @@ services:
       - POSTGRES_HOST=ex
       - POSTGRES_USER=test_db
       - POSTGRES_PASSWORD=somepass
-      # backup every x minutes, integer required
-      - EVERY_MINUTES=1
-      # backup every x minutes, integer required
-      - EVERY_HOURS=1
       # backup every day at the specified time, 24h format, hh:mm
-      - EVERY_DAY_AT=07:30
+      - EVERY_DAY_AT=07:34
       # comma or space separate strings, "system_log" will match "dev_system_log_2010-01"
       # - SCHEMA_ONLY_LIST=
       # Will produce a gzipped plain-format backup if set to "yes", default: "yes"
