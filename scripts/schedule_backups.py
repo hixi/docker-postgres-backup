@@ -30,24 +30,43 @@ def _write_pgpass_file():
         )
 
 def job():
+    print("###################################")
     _update_env_vars()
-    print("I'm working...")
-    print(os.environ)
     _write_pgpass_file()
+    print("backing up...")
     print(subprocess.check_output(['bash', '/usr/local/bin/pg_backup_rotated.sh'], env=os.environ))
+    print("###################################")
 
 def job_once():
     job()
     return schedule.CancelJob
 
-schedule.every(1).seconds.do(job_once)
-# schedule.every(10).minutes.do(job)
-# schedule.every(10).seconds.do(job)
-# schedule.every().hour.do(job)
-# schedule.every().day.at("10:30").do(job)
-# schedule.every().monday.do(job)
-# schedule.every().wednesday.at("13:15").do(job)
+def set_up_schedule():
+    # backup whenever the container is booted, only runs once.
+    schedule.every(1).seconds.do(job_once)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+    every_minutes = os.environ.get('EVERY_MINUTES', None)
+    every_hours = os.environ.get('EVERY_HOURS', None)
+    every_day_at = os.environ.get('EVERY_DAY_AT', None)
+    if every_minutes:
+        schedule.every(int(every_minutes)).minutes.do(job)
+    if every_hours:
+        schedule.every(int(every_hours)).hours.do(job)
+    if every_day_at:
+        schedule.every().day.at(every_day_at).do(job)
+    # Other examples would be:
+    # schedule.every(10).minutes.do(job)
+    # schedule.every(10).seconds.do(job)
+    # schedule.every().hour.do(job)
+    # schedule.every().day.at("10:30").do(job)
+    # schedule.every().monday.do(job)
+    # schedule.every().wednesday.at("13:15").do(job)
+
+def run():
+    set_up_schedule()
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+if __name__ == '__main__':
+    run()
