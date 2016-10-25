@@ -3,6 +3,7 @@ from __future__ import print_function
 import schedule
 import os
 import time
+import datetime
 import subprocess
 
 def _update_env_vars():
@@ -31,22 +32,25 @@ def _write_pgpass_file():
 
 def job():
     print("###################################")
+    print("Time on Server: ", datetime.datetime.now())
     _update_env_vars()
     _write_pgpass_file()
-    print("backing up...")
+    print("backing up")
     print(subprocess.check_output(['bash', '/usr/local/bin/pg_backup_rotated.sh'], env=os.environ))
     print("###################################")
 
 def job_once():
+    print("\nCreating first backup immediately:\n")
     job()
-    return schedule.CancelJob
+    print("\nDone creating initial backup\n")
 
 def set_up_schedule():
     # backup whenever the container is booted, only runs once.
-    schedule.every(1).seconds.do(job_once)
+    job_once()
 
     every_day_at = os.environ.get('EVERY_DAY_AT', '03:02')
-    schedule.every().day.at(every_day_at).do(job)
+    schedule.every(1).days.at(every_day_at).do(job)
+    print("Scheduled to run every day at: ", every_day_at, "(now: {})".format(datetime.datetime.now()))
     # Other examples would be:
     # schedule.every(10).minutes.do(job)
     # schedule.every(10).seconds.do(job)
