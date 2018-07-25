@@ -29,7 +29,7 @@ services:
       # How many weeks to keep weekly backups, default: 5
       # - WEEKS_TO_KEEP=5
   example_db:
-    image: postgres:9.6
+    image: postgres:10
     environment:
       - POSTGRES_USER=test_db
       - POSTGRES_PASSWORD=somepass

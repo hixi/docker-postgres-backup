@@ -6,6 +6,7 @@ import time
 import datetime
 import subprocess
 
+
 def _update_env_vars():
     env = {}
     os.environ['PGPASSFILE'] = '/tmp/.pgpass'
@@ -16,6 +17,7 @@ def _update_env_vars():
     env['POSTGRES_PASSWORD'] = os.environ.get('POSTGRES_PASSWORD', '')
     env['PGPASSWORD'] = os.environ.get('POSTGRES_PASSWORD', '')
     os.environ.update(env)
+
 
 def _write_pgpass_file():
     env = os.environ
@@ -30,19 +32,28 @@ def _write_pgpass_file():
             file=f
         )
 
+
 def job():
-    print("###################################")
+    print(30 * "#")
     print("Time on Server: ", datetime.datetime.now())
     _update_env_vars()
     _write_pgpass_file()
     print("backing up")
-    print(subprocess.check_output(['bash', '/usr/local/bin/pg_backup_rotated.sh'], env=os.environ))
-    print("###################################")
+    result = subprocess.run(['bash', '/usr/local/bin/pg_backup_rotated.sh'], env=os.environ, check=True)
+    if result.stdout:
+        print("Successful Backup")
+        print(result.stdout)
+    elif result.stderr:
+        print("Error while running the backup")
+        print(result.stderr)
+    print(30 * "#")
+
 
 def job_once():
     print("\nCreating first backup immediately:\n")
     job()
     print("\nDone creating initial backup\n")
+
 
 def set_up_schedule():
     # backup whenever the container is booted, only runs once.
@@ -59,11 +70,13 @@ def set_up_schedule():
     # schedule.every().monday.do(job)
     # schedule.every().wednesday.at("13:15").do(job)
 
+
 def run():
     set_up_schedule()
     while True:
         schedule.run_pending()
         time.sleep(1)
+
 
 if __name__ == '__main__':
     run()
